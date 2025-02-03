@@ -14,22 +14,24 @@ class _HomePageState extends State<HomePage> {
     {
       'title': 'Pasta',
       'description': 'Delicious Italian pasta.',
-      'image': 'assets/pasta.jpg'
+      'image': 'assets/pasta.jpg',
+      'steps': '1. Boil water\n2. Add pasta\n3. Cook for 10 minutes\n4. Drain and serve.'
     },
     {
       'title': 'Pizza',
       'description': 'Cheesy pizza with pepperoni.',
-      'image': 'assets/pizza.jpg'
+      'image': 'assets/pizza.jpg',
+      'steps': '1. Preheat oven\n2. Roll out dough\n3. Add toppings\n4. Bake for 15 minutes.'
     },
     {
       'title': 'Salad',
       'description': 'Fresh vegetable salad.',
-      'image': 'assets/salad.jpg'
+      'image': 'assets/salad.jpg',
+      'steps': '1. Chop vegetables\n2. Mix ingredients\n3. Add dressing\n4. Serve chilled.'
     },
   ];
 
   late List<Map<String, String>> filteredRecipes;
-  String searchQuery = '';
 
   @override
   void initState() {
@@ -44,40 +46,12 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  void _searchRecipes(String query) {
-    setState(() {
-      searchQuery = query;
-      filteredRecipes = recipes
-          .where((recipe) =>
-              recipe['title']!.toLowerCase().contains(query.toLowerCase()) ||
-              recipe['description']!
-                  .toLowerCase()
-                  .contains(query.toLowerCase()))
-          .toList();
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Recipe List'),
         backgroundColor: Colors.deepPurple,
-        elevation: 0,
-        actions: <Widget>[
-          Padding(
-            padding: const EdgeInsets.only(right: 16.0),
-            child: IconButton(
-              icon: const Icon(Icons.search),
-              onPressed: () {
-                showSearch(
-                  context: context,
-                  delegate: RecipeSearchDelegate(recipes),
-                );
-              },
-            ),
-          ),
-        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -98,42 +72,40 @@ class _HomePageState extends State<HomePage> {
                       builder: (context) => RecipeDetailPage(
                         title: filteredRecipes[index]['title']!,
                         description: filteredRecipes[index]['description']!,
+                        image: filteredRecipes[index]['image']!,
+                        steps: filteredRecipes[index]['steps']!, // ✅ Passing steps here
                       ),
                     ),
                   );
                 },
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(15),
-                  child: Column(
-                    children: [
-                      Image.asset(
-                        filteredRecipes[index]['image']!,
-                        fit: BoxFit.cover,
-                        height: 200,
-                        width: double.infinity,
+                child: Column(
+                  children: [
+                    Image.asset(
+                      filteredRecipes[index]['image']!,
+                      fit: BoxFit.cover,
+                      height: 200,
+                      width: double.infinity,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(10.0),
+                      child: Text(
+                        filteredRecipes[index]['title']!,
+                        style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.deepPurple,
+                            ),
                       ),
-                      Padding(
-                        padding: const EdgeInsets.all(10.0),
-                        child: Text(
-                          filteredRecipes[index]['title']!,
-                          style:
-                              Theme.of(context).textTheme.titleLarge!.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.deepPurple,
-                                  ),
-                        ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(10.0),
+                      child: Text(
+                        filteredRecipes[index]['description']!,
+                        style: Theme.of(context).textTheme.bodyMedium,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      Padding(
-                        padding: const EdgeInsets.all(10.0),
-                        child: Text(
-                          filteredRecipes[index]['description']!,
-                          style: Theme.of(context).textTheme.bodyMedium,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
             );
@@ -146,93 +118,13 @@ class _HomePageState extends State<HomePage> {
             context,
             MaterialPageRoute(builder: (context) => AddRecipePage()),
           );
-
           if (newRecipe != null) {
             _addNewRecipe(newRecipe);
           }
         },
-        tooltip: 'Add Recipe',
         child: const Icon(Icons.add),
         backgroundColor: Colors.deepPurple,
       ),
-    );
-  }
-}
-
-class RecipeSearchDelegate extends SearchDelegate {
-  final List<Map<String, String>> recipes;
-
-  RecipeSearchDelegate(this.recipes);
-
-  @override
-  List<Widget> buildActions(BuildContext context) {
-    return [
-      IconButton(
-        icon: const Icon(Icons.clear),
-        onPressed: () {
-          query = '';
-        },
-      ),
-    ];
-  }
-
-  @override
-  Widget buildLeading(BuildContext context) {
-    return IconButton(
-      icon: const Icon(Icons.arrow_back),
-      onPressed: () {
-        close(context, null);
-      },
-    );
-  }
-
-  @override
-  Widget buildResults(BuildContext context) {
-    final filteredRecipes = recipes
-        .where((recipe) =>
-            recipe['title']!.toLowerCase().contains(query.toLowerCase()) ||
-            recipe['description']!.toLowerCase().contains(query.toLowerCase()))
-        .toList();
-
-    return ListView.builder(
-      itemCount: filteredRecipes.length,
-      itemBuilder: (context, index) {
-        return ListTile(
-          title: Text(filteredRecipes[index]['title']!),
-          subtitle: Text(filteredRecipes[index]['description']!),
-          onTap: () {
-            close(context, null);
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => RecipeDetailPage(
-                  title: filteredRecipes[index]['title']!,
-                  description: filteredRecipes[index]['description']!,
-                ),
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
-
-  @override
-  Widget buildSuggestions(BuildContext context) {
-    final suggestions = recipes
-        .where((recipe) =>
-            recipe['title']!.toLowerCase().contains(query.toLowerCase()) ||
-            recipe['description']!.toLowerCase().contains(query.toLowerCase()))
-        .toList();
-
-    return ListView.builder(
-      itemCount: suggestions.length,
-      itemBuilder: (context, index) {
-        return ListTile(
-          title: Text(suggestions[index]['title']!),
-          subtitle: Text(suggestions[index]['description']!),
-        );
-      },
     );
   }
 }
