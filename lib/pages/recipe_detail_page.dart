@@ -24,7 +24,7 @@ class RecipeDetailPage extends StatelessWidget {
           children: <Widget>[
             Text(
               title,
-              style: Theme.of(context).textTheme.headline4!.copyWith(
+              style: Theme.of(context).textTheme.titleLarge!.copyWith(
                     fontWeight: FontWeight.bold,
                     color: Colors.deepPurple,
                   ),
@@ -32,7 +32,7 @@ class RecipeDetailPage extends StatelessWidget {
             const SizedBox(height: 20),
             Text(
               description,
-              style: Theme.of(context).textTheme.bodyText1!.copyWith(
+              style: Theme.of(context).textTheme.bodyLarge!.copyWith(
                     fontSize: 18,
                     height: 1.5,
                   ),

@@ -10,7 +10,6 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  // Sample list of recipes
   final List<Map<String, String>> recipes = [
     {
       'title': 'Pasta',
@@ -29,27 +28,22 @@ class _HomePageState extends State<HomePage> {
     },
   ];
 
-  // List to store the filtered recipes
   late List<Map<String, String>> filteredRecipes;
-
-  // Variable to store the search query
   String searchQuery = '';
 
   @override
   void initState() {
     super.initState();
-    filteredRecipes = recipes; // Initial filtered recipes list
+    filteredRecipes = recipes;
   }
 
-  // Callback to update the recipes list when a new recipe is added
   void _addNewRecipe(Map<String, String> newRecipe) {
     setState(() {
-      recipes.add(newRecipe); // Add the new recipe to the list
-      filteredRecipes = recipes; // Update the filtered list
+      recipes.add(newRecipe);
+      filteredRecipes = recipes;
     });
   }
 
-  // Search functionality (same as before)
   void _searchRecipes(String query) {
     setState(() {
       searchQuery = query;
@@ -76,7 +70,6 @@ class _HomePageState extends State<HomePage> {
             child: IconButton(
               icon: const Icon(Icons.search),
               onPressed: () {
-                // Show search dialog
                 showSearch(
                   context: context,
                   delegate: RecipeSearchDelegate(recipes),
@@ -124,7 +117,7 @@ class _HomePageState extends State<HomePage> {
                         child: Text(
                           filteredRecipes[index]['title']!,
                           style:
-                              Theme.of(context).textTheme.headline6!.copyWith(
+                              Theme.of(context).textTheme.titleLarge!.copyWith(
                                     fontWeight: FontWeight.bold,
                                     color: Colors.deepPurple,
                                   ),
@@ -134,7 +127,7 @@ class _HomePageState extends State<HomePage> {
                         padding: const EdgeInsets.all(10.0),
                         child: Text(
                           filteredRecipes[index]['description']!,
-                          style: Theme.of(context).textTheme.bodyText2,
+                          style: Theme.of(context).textTheme.bodyMedium,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -149,13 +142,11 @@ class _HomePageState extends State<HomePage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
-          // Navigate to the Add Recipe page and wait for the result
           final newRecipe = await Navigator.push<Map<String, String>>(
             context,
             MaterialPageRoute(builder: (context) => AddRecipePage()),
           );
 
-          // If a new recipe is returned, add it to the list
           if (newRecipe != null) {
             _addNewRecipe(newRecipe);
           }
@@ -168,7 +159,6 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-// Custom search delegate class
 class RecipeSearchDelegate extends SearchDelegate {
   final List<Map<String, String>> recipes;
 
@@ -211,7 +201,6 @@ class RecipeSearchDelegate extends SearchDelegate {
           title: Text(filteredRecipes[index]['title']!),
           subtitle: Text(filteredRecipes[index]['description']!),
           onTap: () {
-            // Close the search and go to the recipe detail page
             close(context, null);
             Navigator.push(
               context,
