@@ -16,7 +16,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   final List<Map<String, String>> _pages = [
     {"title": "Welcome to Foodie!", "description": "Discover delicious recipes and food tips.", "image": "assets/image1.png"},
     {"title": "Easy to Browse", "description": "Find your favorite meals with ease!", "image": "assets/image2.png"},
-    { "description": "Join the foodie community today!", "image": "assets/image3.png"},
+    {"title": "Lets get STARTED", "description": "Join the foodie community today!", "image": "assets/image3.png"},
   ];
 
   Future<void> _finishOnboarding() async {
