@@ -1,20 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'home_page.dart'; // Replace with your main app screen
+import 'home_page.dart';
 
 class OnboardingScreen extends StatefulWidget {
+  const OnboardingScreen({super.key});
+
   @override
   _OnboardingScreenState createState() => _OnboardingScreenState();
 }
 
 class _OnboardingScreenState extends State<OnboardingScreen> {
-  PageController _pageController = PageController();
+  final PageController _pageController = PageController();
   int _currentPage = 0;
 
   final List<Map<String, String>> _pages = [
-    {"title": "Welcome!", "description": "Discover new features", "image": "assets/image1.png"},
-    {"title": "Easy to Use", "description": "Navigate with ease", "image": "assets/image2.png"},
-    {"title": "Get Started!", "description": "Let's begin your journey", "image": "assets/image3.png"},
+    {"title": "Welcome to Foodie!", "description": "Discover delicious recipes and food tips.", "image": "assets/image1.png"},
+    {"title": "Easy to Browse", "description": "Find your favorite meals with ease!", "image": "assets/image2.png"},
+    { "description": "Join the foodie community today!", "image": "assets/image3.png"},
   ];
 
   Future<void> _finishOnboarding() async {
@@ -22,74 +24,126 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     await prefs.setBool('onboarding_seen', true);
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => HomePage()),
+      MaterialPageRoute(builder: (context) => const HomePage()),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
+      body: Stack(
         children: [
-          Expanded(
-            child: PageView.builder(
-              controller: _pageController,
-              itemCount: _pages.length,
-              onPageChanged: (index) {
-                setState(() {
-                  _currentPage = index;
-                });
-              },
-              itemBuilder: (context, index) {
-                return Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Image.asset(_pages[index]["image"]!, height: 250),
-                    SizedBox(height: 20),
-                    Text(
-                      _pages[index]["title"]!,
-                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                    ),
-                    SizedBox(height: 10),
-                    Text(
-                      _pages[index]["description"]!,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 16, color: Colors.grey),
-                    ),
-                  ],
-                );
-              },
-            ),
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: List.generate(
-              _pages.length,
-              (index) => Container(
-                margin: EdgeInsets.all(4),
-                width: _currentPage == index ? 12 : 8,
-                height: 8,
-                decoration: BoxDecoration(
-                  color: _currentPage == index ? Colors.blue : Colors.grey,
-                  borderRadius: BorderRadius.circular(4),
-                ),
+          // Gradient Background
+          Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Colors.purple.shade900, Colors.purple.shade500],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
               ),
             ),
           ),
-          SizedBox(height: 20),
-          _currentPage == _pages.length - 1
-              ? ElevatedButton(
-                  onPressed: _finishOnboarding,
-                  child: Text("Get Started"),
-                )
-              : ElevatedButton(
-                  onPressed: () {
-                    _pageController.nextPage(
-                        duration: Duration(milliseconds: 300), curve: Curves.easeIn);
+          Column(
+            children: [
+              Expanded(
+                child: PageView.builder(
+                  controller: _pageController,
+                  itemCount: _pages.length,
+                  onPageChanged: (index) {
+                    setState(() {
+                      _currentPage = index;
+                    });
                   },
-                  child: Text("Next"),
+                  itemBuilder: (context, index) {
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Image.asset(_pages[index]["image"]!, height: 250),
+                          const SizedBox(height: 20),
+                          // Glassmorphism Effect
+                          Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(20),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.white.withOpacity(0.2),
+                                  blurRadius: 10,
+                                  spreadRadius: 2,
+                                ),
+                              ],
+                            ),
+                            child: Column(
+                              children: [
+                                Text(
+                                  _pages[index]["title"]!,
+                                  style: const TextStyle(
+                                    fontSize: 26,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                const SizedBox(height: 10),
+                                Text(
+                                  _pages[index]["description"]!,
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    color: Colors.white70,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
                 ),
-          SizedBox(height: 30),
+              ),
+              // Indicator Dots
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(
+                  _pages.length,
+                  (index) => AnimatedContainer(
+                    duration: const Duration(milliseconds: 300),
+                    margin: const EdgeInsets.all(4),
+                    width: _currentPage == index ? 12 : 8,
+                    height: 8,
+                    decoration: BoxDecoration(
+                      color: _currentPage == index ? Colors.white : Colors.white54,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              // Next / Get Started Button
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  foregroundColor: Colors.purple,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                ),
+                onPressed: _currentPage == _pages.length - 1 ? _finishOnboarding : () {
+                  _pageController.nextPage(
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeIn,
+                  );
+                },
+                child: Text(_currentPage == _pages.length - 1 ? "Get Started" : "Next"),
+              ),
+              const SizedBox(height: 40),
+            ],
+          ),
         ],
       ),
     );

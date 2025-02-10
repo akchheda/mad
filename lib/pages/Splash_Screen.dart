@@ -5,6 +5,8 @@ import 'Onboarding_Page.dart';
 import 'home_page.dart'; // Replace with your main app screen
 
 class Splash_Screen extends StatefulWidget {
+  const Splash_Screen({super.key});
+
   @override
   _SplashScreenState createState() => _SplashScreenState();
 }
@@ -20,12 +22,12 @@ class _SplashScreenState extends State<Splash_Screen> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     bool hasSeenOnboarding = prefs.getBool('onboarding_seen') ?? false;
 
-    await Future.delayed(Duration(seconds: 3)); // Simulate loading
+    await Future.delayed(const Duration(seconds: 3)); // Simulate loading
 
     if (hasSeenOnboarding) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => HomePage()),
+        MaterialPageRoute(builder: (context) => const HomePage()),
       );
     } else {
       Navigator.pushReplacement(
@@ -37,7 +39,7 @@ class _SplashScreenState extends State<Splash_Screen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return const Scaffold(
       backgroundColor: Colors.blueAccent,
       body: Center(
         child: Column(
