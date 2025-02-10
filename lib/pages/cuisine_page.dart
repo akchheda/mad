@@ -8,11 +8,11 @@ class CuisinePage extends StatelessWidget {
   final List<Map<String, String>> recipes;
 
   const CuisinePage({
-    Key? key,
+    super.key,
     required this.cuisineName,
     required this.cuisineImage,
     required this.recipes,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

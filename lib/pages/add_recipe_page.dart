@@ -59,6 +59,6 @@ class _AddRecipePageState extends State<AddRecipePage> {
   }
 
   Widget _buildTextField(TextEditingController controller, String label, {int maxLines = 1}) {
-    return TextField(controller: controller, maxLines: maxLines, decoration: InputDecoration(labelText: label, border: OutlineInputBorder()));
+    return TextField(controller: controller, maxLines: maxLines, decoration: InputDecoration(labelText: label, border: const OutlineInputBorder()));
   }
 }
