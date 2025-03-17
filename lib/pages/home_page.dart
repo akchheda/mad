@@ -195,7 +195,7 @@ class _HomePageState extends State<HomePage> {
                         Expanded(
                           child: GridView.builder(
                             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 4, // 2 columns for desktop
+                              crossAxisCount: 6, // 2 columns for desktop
                               crossAxisSpacing: 16,
                               mainAxisSpacing: 16,
                               childAspectRatio: 0.8, // Adjust the aspect ratio

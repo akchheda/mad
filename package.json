@@ -1,5 +1,24 @@
 {
   "dependencies": {
     "firebase": "^11.3.0"
+  },
+  "name": "mad",
+  "description": "",
+  "version": "1.0.0",
+  "main": "index.js",
+  "directories": {
+    "lib": "lib",
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+     "deploy": "gh-pages -d build/web",
+    "predeploy": "flutter build web"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "gh-pages": "^6.3.0"
   }
 }
