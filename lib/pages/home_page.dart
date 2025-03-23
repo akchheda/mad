@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'recipe_detail_page.dart';
 import 'add_recipe_page.dart';
 import 'cuisine_page.dart';
+import 'food_category_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -21,6 +22,15 @@ class _HomePageState extends State<HomePage> {
     {'name': 'Mexican', 'image': 'assets/mexican.jpg'},
   ];
 
+  final List<Map<String, String>> foodCategories = [
+    {'name': 'Breakfast', 'image': 'assets/breakfast.jpg'},
+    {'name': 'Snacks', 'image': 'assets/snacks.jpg'},
+    {'name': 'Lunch', 'image': 'assets/lunch.jpg'},
+    {'name': 'Dinner', 'image': 'assets/dinner.jpg'},
+    {'name': 'Desserts', 'image': 'assets/desserts.jpg'},
+  ];
+
+
   late List<Map<String, String>> filteredRecipes = [];
 
   @override
@@ -29,21 +39,23 @@ class _HomePageState extends State<HomePage> {
     _fetchRecipes();
   }
 
-  Future<void> _fetchRecipes() async {
-    final QuerySnapshot snapshot = await FirebaseFirestore.instance.collection('recipes').get();
-    setState(() {
-      filteredRecipes = snapshot.docs.map((doc) {
-        final data = doc.data() as Map<String, dynamic>;
-        return {
-          'title': data['title'] as String,
-          'description': data['description'] as String,
-          'image': data['image'] as String,
-          'steps': data['steps'] as String,
-          'cuisine': data['cuisine'] as String,
-        };
-      }).toList();
-    });
-  }
+Future<void> _fetchRecipes() async {
+  final QuerySnapshot snapshot = await FirebaseFirestore.instance.collection('recipes').get();
+  setState(() {
+    filteredRecipes = snapshot.docs.map((doc) {
+      final data = doc.data() as Map<String, dynamic>;
+      return {
+        'title': data['title'] as String,
+        'description': data['description'] as String,
+        'image': data['image'] as String,
+        'steps': data['steps'] as String,
+        'cuisine': data['cuisine'] as String,
+        'categories': jsonEncode(List<String>.from(data['categories'] ?? [])), // Convert List<String> to JSON
+      };
+    }).toList();
+  });
+}
+
 
   void _addNewRecipe(Map<String, String> newRecipe) {
     setState(() {
@@ -71,94 +83,163 @@ class _HomePageState extends State<HomePage> {
       ),
       body: LayoutBuilder(
         builder: (context, constraints) {
-          if (constraints.maxWidth > 600) {
-            // Desktop view: Cuisines on the left, recipes on the right
-            return Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Cuisines section (left side)
-                Container(
-                  width: 200, // Fixed width for the cuisines section
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[200],
-                    border: Border(
-                      right: BorderSide(
-                        color: Colors.grey[300]!,
-                        width: 1,
-                      ),
-                    ),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Cuisines',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.deepPurple,
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      Expanded(
-                        child: ListView.builder(
-                          itemCount: cuisines.length,
-                          itemBuilder: (context, index) {
-                            final cuisine = cuisines[index];
-                            return GestureDetector(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => CuisinePage(
-                                      cuisineName: cuisine['name']!,
-                                      cuisineImage: cuisine['image']!,
-                                      recipes: filteredRecipes,
-                                    ),
-                                  ),
-                                );
-                              },
-                              child: Card(
-                                margin: const EdgeInsets.only(bottom: 10),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                elevation: 3,
-                                child: Column(
-                                  children: [
-                                    ClipRRect(
-                                      borderRadius: const BorderRadius.only(
-                                        topLeft: Radius.circular(10),
-                                        topRight: Radius.circular(10),
-                                      ),
-                                      child: Image.asset(
-                                        cuisine['image']!,
-                                        height: 100,
-                                        width: double.infinity,
-                                        fit: BoxFit.cover,
-                                      ),
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Text(
-                                        cuisine['name']!,
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.deepPurple,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+          if (constraints.maxWidth > 600) {  // Desktop View
+   return Row(
+     crossAxisAlignment: CrossAxisAlignment.start,
+     children: [
+       // Left Sidebar (Cuisines & Food Categories)
+       Container(
+         width: 250,  // Sidebar width
+         padding: const EdgeInsets.all(16),
+         decoration: BoxDecoration(
+           color: Colors.grey[200],
+           border: Border(
+             right: BorderSide(
+               color: Colors.grey[300]!,
+               width: 1,
+             ),
+           ),
+         ),
+         child: Column(
+           crossAxisAlignment: CrossAxisAlignment.start,
+           children: [
+             // Cuisines Section
+             const Text(
+               'Cuisines',
+               style: TextStyle(
+                 fontSize: 20,
+                 fontWeight: FontWeight.bold,
+                 color: Colors.deepPurple,
+               ),
+             ),
+             const SizedBox(height: 10),
+             Expanded(
+               flex: 1,
+               child: ListView.builder(
+                 itemCount: cuisines.length,
+                 itemBuilder: (context, index) {
+                   final cuisine = cuisines[index];
+                   return GestureDetector(
+                     onTap: () {
+                       Navigator.push(
+                         context,
+                         MaterialPageRoute(
+                           builder: (context) => CuisinePage(
+                             cuisineName: cuisine['name']!,
+                             cuisineImage: cuisine['image']!,
+                             recipes: filteredRecipes,
+                           ),
+                         ),
+                       );
+                     },
+                     child: Card(
+                       margin: const EdgeInsets.only(bottom: 10),
+                       shape: RoundedRectangleBorder(
+                         borderRadius: BorderRadius.circular(10),
+                       ),
+                       elevation: 3,
+                       child: Column(
+                         children: [
+                           ClipRRect(
+                             borderRadius: const BorderRadius.only(
+                               topLeft: Radius.circular(10),
+                               topRight: Radius.circular(10),
+                             ),
+                             child: Image.asset(
+                               cuisine['image']!,
+                               height: 80,
+                               width: double.infinity,
+                               fit: BoxFit.cover,
+                             ),
+                           ),
+                           Padding(
+                             padding: const EdgeInsets.all(8.0),
+                             child: Text(
+                               cuisine['name']!,
+                               style: const TextStyle(
+                                 fontWeight: FontWeight.bold,
+                                 color: Colors.deepPurple,
+                               ),
+                             ),
+                           ),
+                         ],
+                       ),
+                     ),
+                   );
+                 },
+               ),
+             ),
+
+             const SizedBox(height: 20),
+
+             // Food Categories Section
+             const Text(
+               'Food Categories',
+               style: TextStyle(
+                 fontSize: 20,
+                 fontWeight: FontWeight.bold,
+                 color: Colors.deepPurple,
+               ),
+             ),
+             const SizedBox(height: 10),
+             Expanded(
+               flex: 1,
+               child: ListView.builder(
+                 itemCount: foodCategories.length,
+                 itemBuilder: (context, index) {
+                   final category = foodCategories[index];
+                   return GestureDetector(
+                     onTap: () {
+                       Navigator.push(
+                         context,
+                         MaterialPageRoute(
+                           builder: (context) => FoodCategoryPage(
+                             categoryName: category['name']!,
+                             categoryImage: category['image']!,
+                           ),
+                         ),
+                       );
+                     },
+                     child: Card(
+                       margin: const EdgeInsets.only(bottom: 10),
+                       shape: RoundedRectangleBorder(
+                         borderRadius: BorderRadius.circular(10),
+                       ),
+                       elevation: 3,
+                       child: Column(
+                         children: [
+                           ClipRRect(
+                             borderRadius: const BorderRadius.only(
+                               topLeft: Radius.circular(10),
+                               topRight: Radius.circular(10),
+                             ),
+                             child: Image.asset(
+                               category['image']!,
+                               height: 80,
+                               width: double.infinity,
+                               fit: BoxFit.cover,
+                             ),
+                           ),
+                           Padding(
+                             padding: const EdgeInsets.all(8.0),
+                             child: Text(
+                               category['name']!,
+                               style: const TextStyle(
+                                 fontWeight: FontWeight.bold,
+                                 color: Colors.deepPurple,
+                               ),
+                             ),
+                           ),
+                         ],
+                       ),
+                     ),
+                   );
+                 },
+               ),
+             ),
+           ],
+         ),
+       ),
                 // Recipes section (right side)
                 Expanded(
                   child: Padding(
@@ -317,6 +398,82 @@ class _HomePageState extends State<HomePage> {
                       },
                     ),
                   ),
+                  // Food Categories Section
+                  const Text(
+                    'Food Categories',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.deepPurple,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  SizedBox(
+                    height: 120,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: foodCategories.length,
+                      itemBuilder: (context, index) {
+                        final category = foodCategories[index];
+                        return GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => FoodCategoryPage(
+                                  categoryName: category['name']!,
+                                  categoryImage: category['image']!,
+                                ),
+                              ),
+                            );
+                          },
+                          child: Container(
+                            width: 120,
+                            margin: const EdgeInsets.only(right: 10),
+                            child: Card(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(15),
+                              ),
+                              elevation: 3,
+                              child: Column(
+                                children: [
+                                  ClipRRect(
+                                    borderRadius: const BorderRadius.only(
+                                      topLeft: Radius.circular(15),
+                                      topRight: Radius.circular(15),
+                                    ),
+                                    child: Image.asset(
+                                      category['image']!,
+                                      height: 80,
+                                      width: double.infinity,
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 5),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 5.0),
+                                    child: Text(
+                                      category['name']!,
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.deepPurple,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+
+                  const SizedBox(height: 20), // Space before recipe list
+
                   const SizedBox(height: 20),
                   Expanded(
                     child: ListView.builder(
