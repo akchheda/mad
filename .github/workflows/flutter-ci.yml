@@ -1,0 +1,65 @@
+name: Flutter CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+      - feature/*
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    name: Build & Test Flutter App
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.29.2  
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Run Flutter Tests
+        run: flutter test
+
+      - name: Build APK
+        run: flutter build apk --release
+
+      - name: Upload APK as Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: release-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Download APK Artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: release-apk
+          path: build/app/outputs/flutter-apk/
+
+      - name: Deploy to Firebase App Distribution
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+        run: |
+          npm install -g firebase-tools
+          firebase appdistribution:distribute build/app/outputs/flutter-apk/app-release.apk \
+            --app 1:636213249710:web:c034adcd1f587bbeeccf3f \
+            --release-notes "Automated release" \
+            --groups testers
