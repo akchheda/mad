@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'recipe_detail_page.dart';
+import 'dart:convert';
+import 'dart:typed_data';
 
 class FoodCategoryPage extends StatefulWidget {
   final String categoryName;
@@ -30,21 +32,25 @@ class _FoodCategoryPageState extends State<FoodCategoryPage> {
         await FirebaseFirestore.instance.collection('recipes').get();
 
     setState(() {
-      categoryRecipes = snapshot.docs.map((doc) {
-        final data = doc.data() as Map<String, dynamic>;
+      categoryRecipes = snapshot.docs
+          .map((doc) {
+            final data = doc.data() as Map<String, dynamic>;
 
-        // Check if the recipe belongs to this category
-        List<dynamic> categories = data['categories'] ?? [];
-        if (categories.contains(widget.categoryName)) {
-          return {
-            'title': data['title'] as String,
-            'description': data['description'] as String,
-            'image': data['image'] as String,
-            'steps': data['steps'] as String,
-          };
-        }
-        return null;
-      }).where((recipe) => recipe != null).cast<Map<String, dynamic>>().toList();
+            // Check if the recipe belongs to this category
+            List<dynamic> categories = data['categories'] ?? [];
+            if (categories.contains(widget.categoryName)) {
+              return {
+                'title': data['title'] as String,
+                'description': data['description'] as String,
+                'image': data['image'] as String,
+                'steps': data['steps'] as String,
+              };
+            }
+            return null;
+          })
+          .where((recipe) => recipe != null)
+          .cast<Map<String, dynamic>>()
+          .toList();
     });
   }
 
@@ -54,7 +60,7 @@ class _FoodCategoryPageState extends State<FoodCategoryPage> {
       appBar: AppBar(title: Text(widget.categoryName)),
       body: Column(
         children: [
-          Image.asset(widget.categoryImage, height: 200, fit: BoxFit.cover),
+          _displayCategoryImage(widget.categoryImage),
           const SizedBox(height: 10),
           Expanded(
             child: categoryRecipes.isEmpty
@@ -70,9 +76,12 @@ class _FoodCategoryPageState extends State<FoodCategoryPage> {
                         ),
                         elevation: 3,
                         child: ListTile(
-                          leading: Image.asset(recipe['image'], width: 80, fit: BoxFit.cover),
-                          title: Text(recipe['title'], style: const TextStyle(fontWeight: FontWeight.bold)),
-                          subtitle: Text(recipe['description'], maxLines: 2, overflow: TextOverflow.ellipsis),
+                          leading: _displayRecipeImage(recipe['image']),
+                          title: Text(recipe['title'],
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.bold)),
+                          subtitle: Text(recipe['description'],
+                              maxLines: 2, overflow: TextOverflow.ellipsis),
                           onTap: () {
                             Navigator.push(
                               context,
@@ -92,6 +101,93 @@ class _FoodCategoryPageState extends State<FoodCategoryPage> {
                   ),
           ),
         ],
+      ),
+    );
+  }
+
+  // Display the category image with the same logic as in the CuisinePage
+  Widget _displayCategoryImage(String imagePath) {
+    if (imagePath.startsWith('assets/')) {
+      return Image.asset(
+        imagePath,
+        height: 200,
+        fit: BoxFit.cover,
+      );
+    } else if (imagePath.startsWith('http')) {
+      return Image.network(
+        imagePath,
+        height: 200,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          return _buildErrorWidget();
+        },
+      );
+    } else {
+      try {
+        Uint8List decodedBytes = base64Decode(imagePath);
+        return Image.memory(
+          decodedBytes,
+          height: 200,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            return _buildErrorWidget();
+          },
+        );
+      } catch (e) {
+        return _buildErrorWidget();
+      }
+    }
+  }
+
+  // Display the recipe image with the same logic as in the CuisinePage
+  Widget _displayRecipeImage(String imagePath) {
+    if (imagePath.startsWith('assets/')) {
+      return Image.asset(
+        imagePath,
+        width: 80,
+        height: 80,
+        fit: BoxFit.cover,
+      );
+    } else if (imagePath.startsWith('http')) {
+      return Image.network(
+        imagePath,
+        width: 80,
+        height: 80,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          return _buildErrorWidget();
+        },
+      );
+    } else {
+      try {
+        Uint8List decodedBytes = base64Decode(imagePath);
+        return Image.memory(
+          decodedBytes,
+          width: 80,
+          height: 80,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            return _buildErrorWidget();
+          },
+        );
+      } catch (e) {
+        return _buildErrorWidget();
+      }
+    }
+  }
+
+  // Error widget to show in case image cannot be loaded
+  Widget _buildErrorWidget() {
+    return SizedBox(
+      height: 80,
+      child: Center(
+        child: Text(
+          'Invalid Image Data',
+          style: TextStyle(
+            fontSize: 12,
+            color: Colors.grey[600],
+          ),
+        ),
       ),
     );
   }
